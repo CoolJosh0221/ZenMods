@@ -288,9 +288,9 @@
 		/* Normal tab */
 		& .tabbrowser-tab {
 			--audio-button-top: 0px;
-			--audio-button-left: 6px;
+			--audio-button-left: 0px;
 			--audio-wave-top: 4px;
-			--audio-wave-left: -6px;
+			--audio-wave-left: 6px;
 		}
 
 		/* Patch for SuperPins */
@@ -319,7 +319,7 @@
 		/* Normal tab */
 		& .tabbrowser-tab {
 			--audio-wave-top: 4px;
-			--audio-wave-left: 0px;
+			--audio-wave-left: -4px;
 		}
 
 		/* Patch for SuperPins */
@@ -542,7 +542,7 @@
 		> .tab-stack
 		> .tab-content
 		> .tab-icon-stack::before {
-		width: calc(var(--zen-sidebar-width) - 14px) !important;
+		width: calc(var(--zen-sidebar-width) - 24px) !important;
 	}
 
 	/* Compatibility patch for hidden tab bar */
