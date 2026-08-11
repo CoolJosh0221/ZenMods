@@ -1,52 +1,68 @@
 @-moz-document url-prefix("chrome:") {
 	#tab-preview-panel {
 		/*
-		 * Match Zen's toolbar background and keep preview text readable in both
-		 * light and dark themes. Modern Zen can paint popup surfaces through
-		 * ::part(content), while Arc 2.0 also styles that part globally.
+		 * Firefox now paints popup text from --panel-text-color. Arc 2.0 still
+		 * consumes the older --panel-color, so keep both variables synchronized.
+		 * Use Zen's adaptive toolbar foreground rather than light-dark(), because
+		 * Zen can choose foreground contrast from the active workspace/theme color.
 		 */
-		@media (-moz-pref("zen.mods.TabPreviewEnhanced.enabledBackgroundNative")) {
-			/* Legacy panel path; retained for compatibility with older Zen builds. */
-			--panel-background: var(
+		--panel-text-color: var(
+			--toolbox-textcolor,
+			var(--toolbar-color, var(--lwt-text-color, CanvasText))
+		) !important;
+		--panel-color: var(--panel-text-color) !important;
+		--text-color-deemphasized: color-mix(
+			in srgb,
+			var(--panel-text-color) 70%,
+			transparent
+		) !important;
+		color: var(--panel-text-color) !important;
+	}
+
+	/* Arc 2.0 applies color directly to every panel::part(content). */
+	#tab-preview-panel::part(content) {
+		color: var(--panel-text-color) !important;
+	}
+
+	#tab-preview-panel .tab-preview-title {
+		color: var(--panel-text-color) !important;
+	}
+
+	#tab-preview-panel :is(.tab-preview-uri, .tab-preview-pid-activeness) {
+		color: var(--text-color-deemphasized) !important;
+	}
+
+	/*
+	 * Current Firefox paints panel surfaces from --panel-background-color, not
+	 * the legacy --panel-background. Zen can additionally use native/Mica popup
+	 * painting, so explicitly CSS-paint this panel when the Zen-background option
+	 * is enabled.
+	 */
+	@media (-moz-pref("zen.mods.TabPreviewEnhanced.enabledBackgroundNative")) {
+		#tab-preview-panel {
+			appearance: none !important;
+			-moz-default-appearance: none !important;
+			background-color: transparent !important;
+
+			/* Current Firefox / Zen popup variable. */
+			--panel-background-color: var(
 				--zen-main-browser-background-toolbar
 			) !important;
 
-			/*
-			 * Arc 2.0 can leave --panel-color white even when the preview surface
-			 * resolves light. Resolve the foreground explicitly from Zen's active
-			 * color scheme instead.
-			 */
-			--panel-color: light-dark(#15141b, #fbfbfe) !important;
-			--text-color-deemphasized: color-mix(
-				in srgb,
-				var(--panel-color) 70%,
-				transparent
+			/* Retain the old variable for older Zen/Firefox builds. */
+			--panel-background: var(
+				--zen-main-browser-background-toolbar
 			) !important;
-
-			color: var(--panel-color) !important;
-
-			/*
-			 * Current Zen/Firefox may render the visible popup surface through the
-			 * panel content part, so --panel-background alone is not sufficient.
-			 */
-			&::part(content) {
-				background: var(
-					--zen-main-browser-background-toolbar
-				) !important;
-				color: var(--panel-color) !important;
-			}
-
-			/* Protect the preview foreground from theme-wide panel overrides. */
-			.tab-preview-title {
-				color: var(--panel-color) !important;
-			}
-
-			.tab-preview-uri,
-			.tab-preview-pid-activeness {
-				color: var(--text-color-deemphasized) !important;
-			}
 		}
 
+		#tab-preview-panel::part(content) {
+			background: var(
+				--zen-main-browser-background-toolbar
+			) !important;
+		}
+	}
+
+	#tab-preview-panel {
 		/* Matches Zen panel radius */
 		@media not (-moz-pref("zen.mods.TabPreviewEnhanced.enabledCustomBorderRadius")) {
 			border-radius: var(--panel-border-radius) !important;
