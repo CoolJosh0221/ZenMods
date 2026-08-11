@@ -1,0 +1,15 @@
+{
+	"id": "TabPreviewEnhanced-Arc2",
+	"name": "Tab Preview Enhanced (Arc 2.0 Fix)",
+	"description": "Tab Preview Enhanced with modern Zen and Arc 2.0 background and adaptive light/dark text fixes.",
+	"version": "1.0.1",
+	"author": "CoolJosh0221 / Kaedriz",
+	"homepage": "https://github.com/CoolJosh0221/ZenMods/tree/main/TabPreviewEnhanced",
+	"style": {
+		"chrome": "TabPreviewEnhanced.css"
+	},
+	"preferences": "preferences.json",
+	"fork": [
+		"zen"
+	]
+}
