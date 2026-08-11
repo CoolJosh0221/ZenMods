@@ -1,68 +1,27 @@
 @-moz-document url-prefix("chrome:") {
 	#tab-preview-panel {
 		/*
-		 * Firefox now paints popup text from --panel-text-color. Arc 2.0 still
-		 * consumes the older --panel-color, so keep both variables synchronized.
-		 * Use Zen's adaptive toolbar foreground rather than light-dark(), because
-		 * Zen can choose foreground contrast from the active workspace/theme color.
+		 * Modern Zen scopes --zen-main-browser-background-toolbar to
+		 * #zen-toolbar-background. The companion Sine script resolves that value
+		 * in its native scope and bridges the computed result onto this popup.
+		 *
+		 * Menu/MenuText are deliberately opaque/readable fallbacks, so a failed
+		 * bridge can never regress to a transparent white-on-white preview.
 		 */
-		--panel-text-color: var(
-			--toolbox-textcolor,
-			var(--toolbar-color, var(--lwt-text-color, CanvasText))
-		) !important;
-		--panel-color: var(--panel-text-color) !important;
+		--tpe-native-background-image: none;
+		--tpe-native-background-color: Menu;
+		--tpe-native-foreground: MenuText;
+
+		/* Current Firefox popup variables + Arc 2.0 legacy compatibility. */
+		--panel-text-color: var(--tpe-native-foreground, MenuText) !important;
+		--panel-color: var(--tpe-native-foreground, MenuText) !important;
 		--text-color-deemphasized: color-mix(
 			in srgb,
-			var(--panel-text-color) 70%,
+			var(--tpe-native-foreground, MenuText) 70%,
 			transparent
 		) !important;
-		color: var(--panel-text-color) !important;
-	}
+		color: var(--tpe-native-foreground, MenuText) !important;
 
-	/* Arc 2.0 applies color directly to every panel::part(content). */
-	#tab-preview-panel::part(content) {
-		color: var(--panel-text-color) !important;
-	}
-
-	#tab-preview-panel .tab-preview-title {
-		color: var(--panel-text-color) !important;
-	}
-
-	#tab-preview-panel :is(.tab-preview-uri, .tab-preview-pid-activeness) {
-		color: var(--text-color-deemphasized) !important;
-	}
-
-	/*
-	 * Current Firefox paints panel surfaces from --panel-background-color, not
-	 * the legacy --panel-background. Zen can additionally use native/Mica popup
-	 * painting, so explicitly CSS-paint this panel when the Zen-background option
-	 * is enabled.
-	 */
-	@media (-moz-pref("zen.mods.TabPreviewEnhanced.enabledBackgroundNative")) {
-		#tab-preview-panel {
-			appearance: none !important;
-			-moz-default-appearance: none !important;
-			background-color: transparent !important;
-
-			/* Current Firefox / Zen popup variable. */
-			--panel-background-color: var(
-				--zen-main-browser-background-toolbar
-			) !important;
-
-			/* Retain the old variable for older Zen/Firefox builds. */
-			--panel-background: var(
-				--zen-main-browser-background-toolbar
-			) !important;
-		}
-
-		#tab-preview-panel::part(content) {
-			background: var(
-				--zen-main-browser-background-toolbar
-			) !important;
-		}
-	}
-
-	#tab-preview-panel {
 		/* Matches Zen panel radius */
 		@media not (-moz-pref("zen.mods.TabPreviewEnhanced.enabledCustomBorderRadius")) {
 			border-radius: var(--panel-border-radius) !important;
@@ -88,6 +47,34 @@
 				--zen-mods-TabPreviewEnhanced-marginAmount
 			) !important;
 		}
+	}
+
+	/*
+	 * Zen's macOS rule uses panel[type="arrow"]:not(#feature-callout)::part(content)
+	 * with !important. Duplicate the preview ID intentionally so this selector
+	 * has greater specificity and cannot be forced transparent by that rule.
+	 */
+	@media (-moz-pref("zen.mods.TabPreviewEnhanced.enabledBackgroundNative")) {
+		#tab-preview-panel#tab-preview-panel {
+			--panel-background-color: var(--tpe-native-background-color, Menu) !important;
+			--panel-background: var(--tpe-native-background-color, Menu) !important;
+		}
+
+		#tab-preview-panel#tab-preview-panel::part(content) {
+			background-color: var(--tpe-native-background-color, Menu) !important;
+			background-image: var(--tpe-native-background-image, none) !important;
+			color: var(--tpe-native-foreground, MenuText) !important;
+		}
+	}
+
+	/* Arc 2.0 writes color directly to panel::part(content); beat it explicitly. */
+	#tab-preview-panel#tab-preview-panel::part(content),
+	#tab-preview-panel .tab-preview-title {
+		color: var(--tpe-native-foreground, MenuText) !important;
+	}
+
+	#tab-preview-panel :is(.tab-preview-uri, .tab-preview-pid-activeness) {
+		color: var(--text-color-deemphasized) !important;
 	}
 
 	.tab-preview-thumbnail-container {
